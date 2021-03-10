@@ -24,7 +24,9 @@ local sound_seq_1 = SoundSequence.new({}) -- We can put sound data directly in t
 
 sound_seq_1:Add(6232931161, 1, 0, 0, nil) -- Add A Sound
 
---// How To Add Sounds \\--
+sound_seq_1:Play(camera)
+
+--// Adding Sounds \\--
 
 6232931161	This is the sound id.
 1 - This is the volume.
@@ -33,12 +35,6 @@ sound_seq_1:Add(6232931161, 1, 0, 0, nil) -- Add A Sound
 nil - This is the value (in seconds) of the duration the audio should last.
 
 NOTE: THE AUDIO START TIME IS DIFFERENT FROM THE START TIME.  THE AUDIO START TIME IS THE SECTION IN TIME THE AUDIO WILL START FROM.  THE START TIME IS HOW MUCH YOU WILL HAVE TO WAIT TO HEAR THE SOUND.
-
-while true do
-	print("TRYING TO PLAY")
-	sound_seq_1:Play(camera)
-	wait(1)
-end
 
 ]]--
 
@@ -82,19 +78,24 @@ function SoundSequence:Play(parent)
 	--[[
 	This method plays the SoundSequence, storing the audio objects in the given parent.
 	]]--
+	
 	for _, SoundInfo in pairs(self.SoundSequenceInfo) do
-		local PlayingSound = Instance.new("Sound", parent)
-		PlayingSound.SoundId = "rbxassetid://"..SoundInfo.soundID
-		PlayingSound.Playing = true
-		
-		PlayingSound.Volume = SoundInfo.volume
-		PlayingSound.TimePosition = SoundInfo.startTime
-		
-		if SoundInfo.endTime ~= nil then
-			DebrisService:AddItem(PlayingSound, SoundInfo.endTime - SoundInfo.startTime)
-		else
-			DebrisService:AddItem(PlayingSound, PlayingSound.TimeLength)
-		end
+		delay(SoundInfo.startTime, function()
+			local PlayingSound = Instance.new("Sound", parent)
+			PlayingSound.SoundId = "rbxassetid://"..SoundInfo.soundID
+			
+			PlayingSound.Playing = true
+			PlayingSound.Volume = SoundInfo.volume
+			PlayingSound.TimePosition = SoundInfo.audioStartTime
+			
+			repeat wait() until PlayingSound.isLoaded
+			
+			if SoundInfo.endTime ~= nil then
+				DebrisService:AddItem(PlayingSound, SoundInfo.endTime - SoundInfo.startTime)
+			else
+				DebrisService:AddItem(PlayingSound, PlayingSound.TimeLength)
+			end
+		end)
 	end
 end
 
